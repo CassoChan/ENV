@@ -1,8 +1,8 @@
 #!/bin/bash
 ############################## lib install setting ##############################
-ROS_install=false
-lib_install=false
-vscode_install=false
+ROS_install=true
+lib_install=true
+vscode_install=true
 ssh_setting=false
 
 ##############################       setting       ##############################
@@ -31,12 +31,16 @@ user_name="casun"
 user_password=1
 time_setting=true
 IP_setting=true
+chrome_install=true
+pinyin_install=true
 ;;
 
 3)
 user_name="casso"
 user_password=1
 time_setting=true
+chrome_install=true
+pinyin_install=true
 ;;
 
 *)
@@ -199,6 +203,9 @@ EOL
 sudo apt-get -y install x11vnc
 x11vnc -storepasswd
 sudo mv x11vnc.service /etc/systemd/system
+cd /etc/systemd/system
+sudo chmod 777 x11vnc.service
+cd
 x11vnc -rfbport 5900 -rfbauth /home/${user_name}/.vnc/passwd -display :0 -forever -bg -repeat -nowf -capslock -shared -o /home/${user_name}/.vnc/x11vnc.log
 echo ${user_password} | sudo -S systemctl daemon-reload
 echo ${user_password} | sudo -S systemctl enable x11vnc.service
@@ -253,6 +260,13 @@ sudo apt install -y iceweasel
 fi
 
 
+##############################      chrome install    ###########################
+if [ "$chrome_install" = true ];then
+wget -c https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo dpkg -i google-chrome-stable_current_amd64.deb
+fi
+
+
 ##############################    vscode install    ##############################
 if [ "$vscode_install" = true ];then
 sudo apt install -y software-properties-common apt-transport-https wget
@@ -271,7 +285,7 @@ sudo apt update
 sudo apt install -y code
 
 code --install-extension ms-vscode.cpptools-extension-pack
-code --install-extension ms-ceintl.vscode-language-pack-zh-hans
+# code --install-extension ms-ceintl.vscode-language-pack-zh-hans
 code --install-extension ms-vscode-remote.remote-ssh
 code --install-extension ms-iot.vscode-ros
 code --install-extension redhat.vscode-yaml
@@ -280,6 +294,13 @@ code --install-extension tomoki1207.pdf
 code --install-extension jeff-hykin.better-cpp-syntax
 code --install-extension xaver.clang-format
 code --install-extension alibaba-cloud.tongyi-lingma
+fi
+
+############################## google pinyin ##############################
+if [ "$pinyin_install" = true ];then
+sudo apt install -y fcitx
+im-config
+sudo apt install -y fcitx-googlepinyin
 fi
 
 
@@ -437,9 +458,7 @@ sudo make install
 cd
 mkdir -p driver/src
 cd driver/src
-git clone https://github.com/casso1993/wit_ros.git
-git clone https://github.com/CassoChan/lslidar_cx_driver.git
-git clone https://github.com/Livox-SDK/livox_ros_driver.git
+git clone https://gitee.com/szcasun/driver.git
 cd ..
 catkin_make
 
@@ -466,9 +485,8 @@ fi
 if [ "$fastlio2localization" = true ];then
 # sophus
 cd
-git clone https://github.com/strasdat/Sophus.git
+git clone https://gitee.com/szcasun/driver.git
 cd Sophus
-git checkout a621ff
 mkdir build
 cd build
 cmake ../ -DUSE_BASIC_LOGGING=ON
